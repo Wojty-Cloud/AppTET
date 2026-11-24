@@ -1,0 +1,1034 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="Entrenamiento auditivo técnico de ecualización, ganancia y panorama estéreo.">
+<title>EarLab · Entrenamiento auditivo</title>
+<style>
+:root {
+  --bg:#101215; --side:#15171a; --panel:#181b1f; --low:#111417;
+  --line:#2b2f35; --muted:#a0a6af; --text:#f2f3f3;
+  --lime:#cbf873; --lime-dark:#273326; --bad:#ffaaa1;
+  --mono:ui-monospace,"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+  --ui:Inter,"Segoe UI",system-ui,sans-serif;
+}
+*,*::before,*::after {box-sizing:border-box}
+body {margin:0;color:var(--text);background:var(--bg);font:14px/1.45 var(--ui)}
+[hidden] {display:none!important}
+button,select,input {font:inherit}
+button,select {color:inherit}
+button {cursor:pointer}
+button:disabled {cursor:default}
+a {color:inherit;text-decoration:none}
+:focus-visible {outline:2px solid var(--lime);outline-offset:3px}
+svg {width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.65;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.layout {min-height:100vh;display:grid;grid-template-columns:232px minmax(0,1fr)}
+.sidebar {position:sticky;top:0;height:100dvh;background:var(--side);border-right:1px solid var(--line);padding:28px 16px 20px;display:flex;flex-direction:column}
+.brand {display:flex;align-items:center;gap:11px;margin:0 7px 48px;width:max-content;font-size:23px;font-weight:740;line-height:1;letter-spacing:-.7px}
+.brand-mark {display:grid;place-items:center;width:38px;height:38px;border-radius:9px;background:var(--lime);color:#182212}
+.brand-mark svg {width:23px;height:23px;stroke-width:2}
+.lime {color:var(--lime)}
+.brand small {display:block;margin-top:5px;color:var(--muted);font:8.5px/1.1 var(--mono);letter-spacing:.045em}
+.nav-title {margin:0 0 12px 10px;color:var(--muted);font:10px/1 var(--mono);letter-spacing:.125em}
+.nav-button {width:100%;text-align:left;display:grid;grid-template-columns:20px 1fr 5px;align-items:center;gap:11px;padding:10px;border:1px solid transparent;border-radius:8px;background:transparent;margin-bottom:6px;line-height:1.2;color:#e7e9eb;font-weight:600}
+.nav-button:hover {background:#20242a}
+.nav-button svg {color:#969da8}
+.nav-button small {display:block;font-size:11px;color:var(--muted);font-weight:400;margin-top:5px}
+.nav-button[aria-current] {color:var(--lime);background:#222b20;border-color:#354333}
+.nav-button[aria-current] svg {color:var(--lime)}
+.nav-button[aria-current] small {color:#b2bcae}
+.nav-button[aria-current] .nav-indicator {width:5px;height:5px;border-radius:50%;background:var(--lime)}
+.knob {stroke-width:2.65}
+.sidebar-bottom {margin-top:auto;border-top:1px solid var(--line);padding:14px 8px 0}
+.download {display:flex;gap:8px;align-items:center;width:max-content;font-size:12px;color:var(--text);border-radius:3px}
+.download svg {width:16px;height:16px;color:var(--muted)}
+.download:hover,.download:hover svg {color:var(--lime)}
+.local-note {display:flex;align-items:center;gap:7px;margin-top:14px;font-size:11px;color:var(--muted)}
+.local-note i,.offline i,.scope-label i {width:6px;height:6px;border-radius:50%;background:var(--lime);display:inline-block;flex:none}
+.local-note i {background:#757d85}
+.workspace {min-width:0}
+.topbar {height:62px;border-bottom:1px solid #25292e;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(24px,4vw,64px);background:#131518}
+.crumb {color:var(--muted);font-size:12px;display:flex;gap:11px;align-items:center}
+.crumb span {color:#727985}
+.crumb strong {font-weight:600;color:#e4e6ea}
+.offline {display:flex;align-items:center;gap:7px;color:#bac4ad;background:#1c251b;border:1px solid #30402c;border-radius:24px;padding:5px 10px;font:10px/1.2 var(--mono);white-space:nowrap}
+main {max-width:1104px;margin:auto;padding:32px clamp(24px,4vw,64px) 22px}
+.page-head,.panel-head,.session-caption,.transport,.actions,.foot {display:flex;justify-content:space-between;align-items:center;gap:16px}
+.page-head {margin-bottom:24px;align-items:flex-end}
+h1,h2,p {margin:0}
+h1 {font-size:clamp(29px,4vw,43px);letter-spacing:-.055em;font-weight:720;line-height:1.05}
+.page-head p {font-size:14px;color:var(--muted);margin-top:9px}
+.difficulty {display:grid;gap:6px;flex:none;min-width:148px}
+.difficulty span,.metric span,.session-caption {font:10px/1.15 var(--mono);letter-spacing:.09em;color:var(--muted)}
+select {appearance:none;background:#202329;border:1px solid #363b42;border-radius:7px;padding:8px 28px 8px 11px;min-height:36px;cursor:pointer;width:100%}
+.difficulty,.source-control {position:relative}
+.difficulty::after,.source-control::after {content:"";position:absolute;right:12px;bottom:16px;width:6px;height:6px;border-right:1px solid #b0b7bf;border-bottom:1px solid #b0b7bf;transform:rotate(45deg);pointer-events:none}
+.session-strip,.panel {background:var(--panel);border:1px solid var(--line);border-radius:12px}
+.session-strip {display:grid;grid-template-columns:1fr minmax(95px,16%) minmax(84px,14%);margin-bottom:18px;min-height:66px;align-items:stretch}
+.session-progress {padding:14px 20px;align-self:center}
+.session-caption {margin-bottom:10px}
+.session-caption span {color:var(--text);letter-spacing:.04em}
+.segments {display:grid;grid-template-columns:repeat(10,1fr);gap:5px}
+.segments span {height:4px;border-radius:4px;background:#33383f}
+.segments .current {background:#718751}
+.segments .correct {background:var(--lime)}
+.segments .incorrect {background:#c47970}
+.segments .skipped {background:#717783}
+.metric {border-left:1px solid var(--line);display:grid;padding:9px 16px 8px;align-content:center;gap:4px}
+.metric strong {color:var(--lime);font:600 19px/1 var(--mono)}
+.panel {padding:19px 20px 16px}
+.audio-panel {margin-bottom:16px}
+h2 {font-size:19px;line-height:1.2;letter-spacing:-.025em}
+.panel-head p {margin-top:5px;color:var(--muted);font-size:12.5px}
+.source-control {flex:none;min-width:148px}
+.source-control svg {position:absolute;pointer-events:none;left:9px;top:10px;width:15px;height:15px;color:#aeb5bd}
+.source-control select {padding-left:30px;font-size:12px}
+.scope {background:var(--low);margin-top:15px;border:1px solid #2a3036;border-radius:8px;overflow:hidden}
+.scope-head {display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 12px 5px;color:var(--muted);font:10px/1.15 var(--mono);letter-spacing:.045em}
+.scope-label {display:flex;align-items:center;gap:7px;color:#b2baa9}
+.scope-label i {width:5px;height:5px}
+#transport-time {white-space:nowrap;font-variant-numeric:tabular-nums}
+canvas {display:block;width:100%;height:84px}
+.timeline {display:flex;justify-content:space-between;padding:4px 12px 8px;color:#9da5af;font:9px/1.1 var(--mono)}
+.transport {justify-content:flex-start;margin-top:13px;gap:9px}
+.play {border:1px solid var(--lime);color:#1d2713;background:var(--lime);border-radius:7px;width:43px;height:42px;display:grid;place-items:center;flex:none}
+.play:hover,.primary:hover:enabled {background:#ddff9c}
+.play svg {width:19px;height:19px;stroke:none;fill:currentColor}
+.ab {display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.ab-button {display:flex;align-items:center;gap:7px;padding:6px 11px 6px 7px;border:1px solid #353a41;background:#1f2328;color:#d9dde2;border-radius:7px;min-height:42px;font-size:12px;font-weight:580;text-align:left}
+.ab-button:hover {border-color:#677568}
+.ab-button.active {border-color:#546844;background:#252f21;color:var(--lime)}
+.ab-letter {background:#30363c;border-radius:4px;display:grid;place-items:center;width:24px;height:24px;font:600 13px/1 var(--mono)}
+.ab-button.active .ab-letter {color:var(--lime);background:#3c4c30}
+.volume {display:flex;align-items:center;gap:7px;margin-left:auto;color:var(--muted);font:11px/1 var(--mono)}
+.volume svg {width:17px;height:17px}
+.volume input {width:clamp(55px,10vw,105px);accent-color:var(--lime);cursor:pointer}
+.volume output {display:block;width:4ch;text-align:right}
+.audio-error {margin-top:8px;color:var(--bad);font-size:12px}
+.options {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:14px}
+.option {min-width:0;background:#202329;border:1px solid #343941;border-radius:7px;text-align:left;padding:8px 10px;color:var(--text);position:relative;min-height:53px}
+.option:hover:not([aria-disabled="true"]) {background:#272d31;border-color:#738463}
+.option[aria-pressed="true"] {background:#293522;border-color:#9ec55f}
+.option strong {display:block;font:600 14px/1.1 var(--mono);letter-spacing:-.02em}
+.option small {display:block;color:var(--muted);font-size:10.5px;margin-top:4px}
+.option.is-correct {border-color:#9ec55f;background:#273322;color:var(--lime)}
+.option.is-wrong {border-color:#ab665f;background:#392924;color:#ffb9b0}
+.option[aria-disabled="true"] {cursor:default}
+.option.is-correct::after,.option.is-wrong::after {position:absolute;right:8px;top:6px;font:700 13px/1 var(--ui)}
+.option.is-correct::after {content:"✓"}
+.option.is-wrong::after {content:"×"}
+.actions {margin-top:13px;min-height:35px}
+.answer-hint {color:var(--muted);font-size:11px}
+.action-buttons {display:flex;gap:8px;margin-left:auto}
+.primary,.secondary {border-radius:7px;padding:7px 12px;min-height:36px;font-size:12px;font-weight:650;white-space:nowrap}
+.primary {background:var(--lime);color:#1a2313;border:1px solid var(--lime)}
+.primary span {margin-left:6px}
+.primary:disabled {background:#2f3929;color:#a6b09b;border-color:#3f4d37}
+.secondary {background:transparent;color:#c1c7ce;border:1px solid #383e45}
+.secondary:hover {color:var(--text);background:#262a30}
+.feedback {padding:9px 10px;margin-top:11px;background:#222b21;border:1px solid #3d5136;border-radius:6px;color:#e2edda;font-size:12px}
+.feedback.incorrect {background:#302322;border-color:#68433e;color:#ffd4ce}
+.feedback.skipped {background:#25282e;border-color:#414651;color:var(--text)}
+.foot {font-size:11px;color:#a0a6af;margin-top:14px}
+.headphones,.shortcuts {display:flex;align-items:center;gap:6px}
+.headphones svg {width:15px;height:15px}
+kbd {font:10px var(--mono);padding:2px 4px;border:1px solid #3a4048;border-radius:4px;background:#1b1f24;color:#c9ced4}
+.shortcuts {white-space:nowrap}
+.shortcuts kbd:nth-of-type(2) {margin-left:6px}
+.summary {padding:24px}
+.summary p {color:var(--muted);margin-top:8px}
+.summary-metrics {display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}
+.summary-metrics div {border:1px solid var(--line);background:var(--low);border-radius:7px;padding:12px}
+.summary-metrics strong {display:block;color:var(--lime);font:600 19px var(--mono);margin-bottom:4px}
+.summary-metrics span {color:var(--muted);font-size:11px}
+@media (min-width:1100px) and (min-height:900px) {
+  main {padding-top:39px}
+  .page-head {margin-bottom:28px}
+  .panel {padding:21px 23px 18px}
+  canvas {height:102px}
+  .option {min-height:58px;padding:10px 12px}
+}
+@media (max-width:850px) {
+  .layout {grid-template-columns:180px minmax(0,1fr)}
+  .sidebar {padding-left:10px;padding-right:10px}
+  .brand {margin-left:4px}
+  .nav-button {gap:7px;padding:8px}
+  .nav-button small {font-size:10px}
+  main,.topbar {padding-left:20px;padding-right:20px}
+}
+@media (max-width:640px) {
+  .layout {display:block}
+  .sidebar {position:static;height:auto;padding:12px 15px 9px;border-right:0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px}
+  .brand {margin:0;font-size:20px}
+  .brand-mark {width:32px;height:32px;border-radius:7px}
+  .brand small,.nav-title,.nav-button small,.nav-indicator,.local-note {display:none}
+  .sidebar nav {grid-row:2;grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+  .nav-button {display:flex;justify-content:center;gap:5px;font-size:11px;margin:0}
+  .nav-button svg {width:15px;height:15px}
+  .sidebar-bottom {grid-row:1;grid-column:2;padding:0;margin:0;border:0}
+  .topbar {height:38px}
+  main,.topbar {padding-left:14px;padding-right:14px}
+  main {padding-top:21px}
+  .page-head {gap:9px;margin-bottom:16px}
+  .page-head p {font-size:12px;margin-top:6px}
+  .difficulty {min-width:113px;max-width:130px}
+  .difficulty select {font-size:12px}
+  .session-strip {margin-bottom:12px;grid-template-columns:1fr 62px 53px}
+  .session-progress {padding:10px}
+  .metric {padding:7px}
+  .metric span,.session-caption {font-size:9px}
+  .metric strong {font-size:16px}
+  .segments {gap:3px}
+  .panel {padding:13px 11px}
+  .panel-head {gap:8px}
+  h2 {font-size:16px}
+  .panel-head p {font-size:11px}
+  .source-control {min-width:0;max-width:133px}
+  .source-control select {font-size:11px;padding-left:25px}
+  .source-control svg {left:7px}
+  .options {gap:5px}
+  .option {padding:7px 6px}
+  .option strong {font-size:12px}
+  .option small {font-size:9px}
+  .play {width:34px;height:41px}
+  .transport,.ab {gap:5px}
+  .ab-button {padding:4px;gap:4px;font-size:10.5px}
+  .ab-letter {width:19px;height:21px;font-size:11px}
+  .volume {gap:3px;font-size:9px}
+  .volume svg {display:none}
+  .volume input {width:clamp(29px,10vw,65px);margin:0}
+  .answer-hint {font-size:10px}
+  .shortcuts {display:none}
+}
+@media (max-width:360px) {
+  .crumb {gap:5px}
+  .source-control svg {display:none}
+  .source-control select {padding-left:7px}
+  .difficulty {min-width:99px}
+  .action-buttons {gap:5px}
+  .primary,.secondary {padding-left:8px;padding-right:8px}
+}
+
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar" aria-label="Navegación">
+    <a class="brand" href="./" id="home" aria-label="EarLab, ecualización">
+      <span class="brand-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h3l2.5-6 3.5 12 3.5-12 2.5 6h3"/></svg></span>
+      <span>Ear<span class="lime">Lab</span><small>ENTRENAMIENTO AUDITIVO</small></span>
+    </a>
+    <nav id="module-nav" aria-label="Ejercicios">
+      <p class="nav-title">EJERCICIOS</p>
+      <button type="button" class="nav-button" data-mode="eq" aria-current="page">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><path class="knob" d="M8 4v4m8 2v4m-5 2v4"/></svg>
+        <span>Ecualización<small>Bandas de frecuencia</small></span><span class="nav-indicator"></span>
+      </button>
+      <button type="button" class="nav-button" data-mode="gain">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 16v-4m4 7V9m6 11V4m4 12V8"/></svg>
+        <span>Ganancia<small>Diferencias de nivel</small></span><span class="nav-indicator"></span>
+      </button>
+      <button type="button" class="nav-button" data-mode="pan">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M3 12h18M6 9l-3 3 3 3m12-6 3 3-3 3"/></svg>
+        <span>Panorama<small>Posición estéreo</small></span><span class="nav-indicator"></span>
+      </button>
+    </nav>
+    <div class="sidebar-bottom">
+      <a id="download" class="download" href="earlab.html" download="earlab.html">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M5 16v4h14v-4"/></svg>
+        Descargar HTML
+      </a>
+      <span class="local-note" id="local-note"><i></i> Tus datos se guardan aquí</span>
+    </div>
+  </aside>
+  <div class="workspace">
+    <header class="topbar">
+      <span class="crumb">Laboratorio <span>/</span> <strong id="breadcrumb">Ecualización</strong></span>
+      <span class="offline"><i></i> Funciona sin conexión</span>
+    </header>
+    <main>
+      <header class="page-head">
+        <div>
+          <h1 id="mode-title">Ecualización</h1>
+          <p id="mode-description">Reconoce qué banda de frecuencia cambia entre dos señales.</p>
+        </div>
+        <label class="difficulty"><span>DIFICULTAD</span>
+          <select id="difficulty" aria-label="Dificultad">
+            <option value="basic">Inicial</option>
+            <option value="mid">Intermedio</option>
+            <option value="advanced">Avanzado</option>
+          </select>
+        </label>
+      </header>
+      <section class="session-strip" aria-label="Progreso de la sesión">
+        <div class="session-progress">
+          <div class="session-caption">SESIÓN ACTUAL <span id="round-label">01 / 10</span></div>
+          <div class="segments" id="segments" aria-hidden="true"></div>
+        </div>
+        <div class="metric"><span>ACIERTO</span><strong id="accuracy">—</strong></div>
+        <div class="metric"><span>RACHA</span><strong id="streak">0</strong></div>
+      </section>
+      <div id="training">
+        <section class="panel audio-panel" aria-labelledby="audio-title">
+          <div class="panel-head">
+            <div><h2 id="audio-title">Escucha comparativa</h2><p>Alterna entre A y B para escuchar el cambio.</p></div>
+            <label class="source-control">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l12-2v13M9 9l12-2"/><ellipse cx="6" cy="18" rx="3" ry="2"/><ellipse cx="18" cy="16" rx="3" ry="2"/></svg>
+              <select id="source" aria-label="Fuente de audio">
+                <option value="music">Loop musical</option>
+                <option value="pink">Ruido rosa</option>
+                <option value="drums">Percusión</option>
+              </select>
+            </label>
+          </div>
+          <div class="scope">
+            <div class="scope-head"><span class="scope-label"><i></i> FORMA DE ONDA</span><span id="transport-time">0:00.0 / 0:08.0</span></div>
+            <canvas id="waveform" role="img" aria-label="Forma de onda de la señal de referencia"></canvas>
+            <div id="timeline" class="timeline" aria-hidden="true"></div>
+          </div>
+          <div class="transport">
+            <button type="button" id="play" class="play" aria-label="Reproducir" title="Reproducir o pausar (Espacio)">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path id="play-icon" d="M8 5l12 7-12 7z"/></svg>
+            </button>
+            <div class="ab" aria-label="Señal de escucha">
+              <button type="button" class="ab-button active" data-side="a" aria-pressed="true"><span class="ab-letter">A</span><span>Referencia</span></button>
+              <button type="button" class="ab-button" data-side="b" aria-pressed="false"><span class="ab-letter">B</span><span>Procesada</span></button>
+            </div>
+            <label class="volume">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4zM16 9a4 4 0 0 1 0 6m2-8a7 7 0 0 1 0 10"/></svg>
+              <input type="range" id="volume" min="0" max="100" value="35" aria-label="Volumen de escucha">
+              <output id="volume-label" for="volume">35%</output>
+            </label>
+          </div>
+          <p id="audio-error" class="audio-error" role="alert" hidden></p>
+        </section>
+        <section class="panel answer-panel" aria-labelledby="question">
+          <div class="panel-head question-head">
+            <div><h2 id="question">¿Qué frecuencia cambió?</h2><p id="question-help">Selecciona la frecuencia central del filtro aplicado a la señal B.</p></div>
+          </div>
+          <div id="options" class="options" role="group" aria-labelledby="question"></div>
+          <div id="feedback" class="feedback" role="status" hidden></div>
+          <div class="actions">
+            <span class="answer-hint" id="answer-hint">Escucha ambas señales para confirmar.</span>
+            <div class="action-buttons">
+              <button type="button" class="secondary" id="skip">Saltar</button>
+              <button type="button" class="primary" id="confirm" disabled>Confirmar <span aria-hidden="true">→</span></button>
+            </div>
+          </div>
+        </section>
+      </div>
+      <section class="panel summary" id="summary" aria-labelledby="summary-title" hidden>
+        <h2 id="summary-title" tabindex="-1">Sesión completada</h2>
+        <p id="summary-copy"></p>
+        <div class="summary-metrics">
+          <div><strong id="summary-score"></strong><span>Aciertos</span></div>
+          <div><strong id="summary-skip"></strong><span>Saltadas</span></div>
+          <div><strong id="summary-best"></strong><span>Mejor racha global del módulo</span></div>
+        </div>
+        <button type="button" class="primary" id="restart">Nueva sesión <span aria-hidden="true">→</span></button>
+      </section>
+      <footer class="foot">
+        <span class="headphones"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 14v-3a8 8 0 0 1 16 0v3M4 13h4v7H6a2 2 0 0 1-2-2zm16 0h-4v7h2a2 2 0 0 0 2-2z"/></svg> Usa auriculares y comienza con el volumen bajo.</span>
+        <span class="shortcuts"><kbd>Espacio</kbd> Reproducir <kbd>A</kbd> <kbd>B</kbd> Alternar</span>
+      </footer>
+    </main>
+  </div>
+</div>
+<script>
+"use strict";
+
+const ROUND_COUNT = 10;
+const SAMPLE_RATE = 32000;
+const LOOP_SECONDS = 8;
+const TAU = 2 * Math.PI;
+const STORE_KEY = "earlab.v1";
+const levels = ["basic", "mid", "advanced"];
+const sources = ["music", "pink", "drums"];
+const bands = {
+  63: ["63 Hz", "Subgraves", "Escucha el peso profundo del bombo y el bajo."],
+  80: ["80 Hz", "Subgraves", "Escucha el peso profundo del bombo y el bajo."],
+  125: ["125 Hz", "Graves", "Escucha cuánto cuerpo gana o pierde el bajo."],
+  250: ["250 Hz", "Graves altos", "Escucha la calidez y la densidad de la mezcla."],
+  500: ["500 Hz", "Medios bajos", "Escucha si la mezcla toma un carácter más cerrado o hueco."],
+  1000: ["1 kHz", "Medios", "Escucha los cambios en el carácter nasal y la definición de las notas."],
+  2000: ["2 kHz", "Medios altos", "Escucha el ataque y la definición de los instrumentos."],
+  4000: ["4 kHz", "Presencia", "Escucha cómo cambia la nitidez de los transitorios."],
+  8000: ["8 kHz", "Brillo", "Concéntrate en el chisporroteo del hi-hat y los bordes brillantes de la señal."],
+  10000: ["10 kHz", "Agudos", "Sigue el brillo del hi-hat y la textura fina del ruido."]
+};
+const modes = {
+  eq: {
+    title: "Ecualización",
+    description: "Reconoce qué banda de frecuencia cambia entre dos señales.",
+    question: "¿Qué frecuencia cambió?",
+    help: "Selecciona la frecuencia central del filtro aplicado a la señal B.",
+    values: {
+      basic: [80, 250, 500, 1000, 4000, 8000],
+      mid: [125, 250, 500, 1000, 2000, 4000],
+      advanced: [63, 125, 250, 500, 1000, 2000, 4000, 10000]
+    }
+  },
+  gain: {
+    title: "Ganancia",
+    description: "Entrena tu oído para estimar cambios de nivel en decibelios.",
+    question: "¿Cuántos dB cambió el nivel?",
+    help: "Estima cuánto subió o bajó el nivel de B con respecto a A.",
+    values: {
+      basic: [-8, -4, -2, 2, 4, 8],
+      mid: [-4, -2, -1, 1, 2, 4],
+      advanced: [-2, -1, -0.5, 0.5, 1, 2]
+    }
+  },
+  pan: {
+    title: "Panorama",
+    description: "Identifica hacia dónde se desplaza una señal en el campo estéreo.",
+    question: "¿Dónde está la señal B?",
+    help: "Estima la dirección y la cantidad de paneo desde el centro (A).",
+    values: {
+      basic: [-100, -70, -40, 40, 70, 100],
+      mid: [-70, -45, -20, 20, 45, 70],
+      advanced: [-45, -25, -10, 10, 25, 45]
+    }
+  }
+};
+
+const get = id => document.getElementById(id);
+const canvas = get("waveform");
+const wave = canvas.getContext("2d");
+const nav = [...document.querySelectorAll("[data-mode]")];
+const sideButtons = [...document.querySelectorAll("[data-side]")];
+const numberFormat = new Intl.NumberFormat("es-MX", {maximumFractionDigits: 1});
+
+let storageWorks = true;
+const profile = loadProfile();
+let mode = profile.mode;
+let level = profile.level;
+let source = profile.source;
+let selectedSide = "a";
+let round;
+let choice = null;
+let result = null;
+let summaryVisible = false;
+let heard = new Set();
+let audioContext;
+let audioGraph;
+let audioPending = false;
+let requestVersion = 0;
+let offset = 0;
+let waveformBars = [];
+let animationFrame = 0;
+const samples = new Map();
+const buffers = new Map();
+
+function loadProfile() {
+  const defaults = {mode: "eq", level: "basic", source: "music", volume: 35, sessions: {}};
+  try {
+    const data = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
+    if (!data || typeof data !== "object") return defaults;
+    if (Object.hasOwn(modes, data.mode)) defaults.mode = data.mode;
+    if (levels.includes(data.level)) defaults.level = data.level;
+    if (sources.includes(data.source)) defaults.source = data.source;
+    if (Number.isFinite(data.volume)) defaults.volume = Math.max(0, Math.min(100, Math.round(data.volume)));
+    for (const currentMode of Object.keys(modes)) {
+      for (const currentLevel of levels) {
+        const key = currentMode + ":" + currentLevel;
+        const saved = data.sessions?.[key];
+        if (!saved || !Array.isArray(saved.results)) continue;
+        const results = saved.results.slice(0, ROUND_COUNT).filter(value => ["correct", "incorrect", "skipped"].includes(value));
+        const best = Number.isInteger(saved.best) ? Math.max(0, Math.min(ROUND_COUNT, saved.best)) : 0;
+        defaults.sessions[key] = {results, best, last: modes[currentMode].values[currentLevel].includes(saved.last) ? saved.last : null};
+      }
+    }
+  } catch {
+    storageWorks = false;
+  }
+  return defaults;
+}
+
+function saveProfile() {
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify(profile));
+    storageWorks = true;
+  } catch {
+    storageWorks = false;
+  }
+  get("local-note").textContent = storageWorks ? "El progreso se guarda en este navegador" : "El progreso se guarda durante esta visita";
+}
+
+function session() {
+  const key = mode + ":" + level;
+  profile.sessions[key] ??= {results: [], best: 0, last: null};
+  return profile.sessions[key];
+}
+
+function signedDb(value) {
+  return (value < 0 ? "−" : "+") + numberFormat.format(Math.abs(value)) + " dB";
+}
+
+function optionLabel(value) {
+  if (mode === "eq") return bands[value];
+  if (mode === "gain") return [signedDb(value), value < 0 ? "Atenuación" : "Aumento"];
+  return [(value < 0 ? "I" : "D") + " · " + Math.abs(value) + " %", value < 0 ? "Izquierda" : "Derecha"];
+}
+
+function chooseRound() {
+  const options = modes[mode].values[level];
+  const candidates = options.filter(value => value !== session().last);
+  const target = candidates[Math.floor(Math.random() * candidates.length)];
+  const amount = {basic: 9, mid: 6, advanced: 3.5}[level];
+  const sign = level === "basic" || Math.random() < 0.5 ? 1 : -1;
+  round = {target, eqGain: amount * sign, q: {basic: 0.95, mid: 1.2, advanced: 1.4}[level]};
+}
+
+function consecutiveCorrect(results) {
+  let count = 0;
+  for (let index = results.length - 1; results[index] === "correct"; index--) count++;
+  return count;
+}
+
+function updateProgress() {
+  const results = session().results;
+  const current = Math.min(ROUND_COUNT, results.length + (result ? 0 : 1));
+  const correct = results.filter(value => value === "correct").length;
+  get("round-label").textContent = String(current).padStart(2, "0") + " / " + ROUND_COUNT;
+  get("accuracy").textContent = results.length ? Math.round(100 * correct / results.length) + "%" : "—";
+  get("streak").textContent = consecutiveCorrect(results);
+  get("segments").replaceChildren(...Array.from({length: ROUND_COUNT}, (_, index) => {
+    const segment = document.createElement("span");
+    segment.className = results[index] || (index + 1 === current ? "current" : "");
+    return segment;
+  }));
+}
+
+function drawOptions() {
+  const buttons = modes[mode].values[level].map(value => {
+    const [title, detail] = optionLabel(value);
+    const button = document.createElement("button");
+    const emphasis = document.createElement("strong");
+    const subtitle = document.createElement("small");
+    button.type = "button";
+    button.className = "option";
+    button.dataset.value = value;
+    button.setAttribute("aria-pressed", "false");
+    emphasis.textContent = title;
+    subtitle.textContent = detail;
+    button.append(emphasis, subtitle);
+    return button;
+  });
+  get("options").replaceChildren(...buttons);
+}
+
+function updateOptions() {
+  for (const button of get("options").children) {
+    const value = Number(button.dataset.value);
+    button.setAttribute("aria-pressed", String(choice === value));
+    button.setAttribute("aria-disabled", String(Boolean(result)));
+    button.classList.toggle("is-correct", Boolean(result) && value === round.target);
+    button.classList.toggle("is-wrong", result === "incorrect" && value === choice);
+  }
+}
+
+function updateActions() {
+  const confirm = get("confirm");
+  get("skip").hidden = Boolean(result);
+  get("answer-hint").textContent = result ? "" :
+    heard.size < 2 ? "Escucha ambas señales para confirmar." :
+    choice === null ? "Selecciona una respuesta." : "";
+  confirm.disabled = !result && (choice === null || heard.size < 2);
+  const label = result ?
+    session().results.length === ROUND_COUNT ? "Ver resultados" : "Siguiente ronda" : "Confirmar";
+  confirm.firstChild.textContent = label + " ";
+}
+
+function renderTransport() {
+  const playing = Boolean(audioGraph);
+  get("play").setAttribute("aria-label", playing ? "Pausar" : "Reproducir");
+  get("play-icon").setAttribute("d", playing ? "M7 5h4v14H7zM14 5h4v14h-4z" : "M8 5l12 7-12 7z");
+  for (const button of sideButtons) {
+    const isSelected = button.dataset.side === selectedSide;
+    button.classList.toggle("active", isSelected);
+    button.setAttribute("aria-pressed", String(isSelected));
+  }
+}
+
+function displayMode() {
+  const content = modes[mode];
+  for (const button of nav) {
+    if (button.dataset.mode === mode) button.setAttribute("aria-current", "page");
+    else button.removeAttribute("aria-current");
+  }
+  get("mode-title").textContent = content.title;
+  get("breadcrumb").textContent = content.title;
+  get("mode-description").textContent = content.description;
+  get("question").textContent = content.question;
+  get("question-help").textContent = content.help;
+  get("difficulty").value = level;
+  if (session().results.length === ROUND_COUNT) showSummary(false);
+  else newRound();
+}
+
+function newRound() {
+  stopPlayback(true);
+  summaryVisible = false;
+  get("training").hidden = false;
+  get("summary").hidden = true;
+  result = null;
+  choice = null;
+  selectedSide = "a";
+  heard = new Set();
+  get("feedback").hidden = true;
+  chooseRound();
+  drawOptions();
+  updateProgress();
+  updateActions();
+  renderTransport();
+  resizeWave();
+}
+
+function submit(skipped) {
+  if (result || summaryVisible || (!skipped && (choice === null || heard.size < 2))) return;
+  result = skipped ? "skipped" : choice === round.target ? "correct" : "incorrect";
+  const record = session();
+  record.results.push(result);
+  record.last = round.target;
+  record.best = Math.max(record.best, consecutiveCorrect(record.results));
+  saveProfile();
+
+  const [answer, category, tip] = optionLabel(round.target);
+  let detail;
+  if (mode === "eq") {
+    detail = "En B se aplicó " + signedDb(round.eqGain) + " a " + answer + " (Q " + numberFormat.format(round.q) + "). " + tip;
+  } else if (mode === "gain") {
+    detail = "La señal B tiene un cambio de " + answer + " respecto a A.";
+  } else {
+    detail = "La señal B está paneada " + Math.abs(round.target) + " % a la " + category.toLowerCase() + ".";
+  }
+  const feedback = get("feedback");
+  const status = document.createElement("strong");
+  status.textContent = {correct: "Correcto. ", incorrect: "Respuesta incorrecta. ", skipped: "Ronda saltada. "}[result];
+  feedback.className = "feedback " + result;
+  feedback.replaceChildren(status, detail);
+  feedback.hidden = false;
+  updateOptions();
+  updateActions();
+  updateProgress();
+  get("confirm").focus();
+}
+
+function showSummary(focus) {
+  stopPlayback(true);
+  summaryVisible = true;
+  get("summary").hidden = false;
+  get("training").hidden = true;
+  const {results} = session();
+  const correct = results.filter(value => value === "correct").length;
+  const skipped = results.filter(value => value === "skipped").length;
+  get("summary-copy").textContent = modes[mode].title + " · " + get("difficulty").selectedOptions[0].textContent;
+  get("summary-score").textContent = correct + " / " + ROUND_COUNT;
+  get("summary-skip").textContent = skipped;
+  get("summary-best").textContent = Math.max(...levels.map(difficulty => profile.sessions[mode + ":" + difficulty]?.best || 0));
+  updateProgress();
+  if (focus) get("summary-title").focus();
+}
+
+function seededRandom(seed) {
+  return () => {
+    seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+    return seed / 2 ** 32;
+  };
+}
+
+function makeSignal(kind) {
+  const data = new Float32Array(LOOP_SECONDS * SAMPLE_RATE);
+  const random = seededRandom(kind === "pink" ? 83121 : 67503);
+  if (kind === "pink") {
+    // Summing random streams at octave-spaced rates approximates 1/f power.
+    const octaves = new Float32Array(15);
+    let previous = 0;
+    for (let i = 0; i < data.length; ++i) {
+      let sum = random() - 0.5;
+      for (let octave = 0; octave < octaves.length; ++octave) {
+        if ((i & ((1 << octave) - 1)) === 0) octaves[octave] = random() - 0.5;
+        sum += octaves[octave];
+      }
+      // A slow DC blocker prevents sub-audible drift.
+      previous += 0.0015 * (sum - previous);
+      data[i] = sum - previous;
+    }
+  } else {
+    const beat = LOOP_SECONDS / 16;
+    const add = (start, duration, voice) => {
+      const first = Math.round(start * SAMPLE_RATE);
+      const count = Math.min(data.length - first, Math.round(duration * SAMPLE_RATE));
+      for (let i = 0; i < count; ++i) data[first + i] += voice(i / SAMPLE_RATE, i, count);
+    };
+    for (let step = 0; step < 32; ++step) {
+      const onset = step * beat / 2;
+      const kick = [0, 5, 8, 14, 16, 20, 24, 29].includes(step);
+      if (kick) {
+        add(onset, 0.38, t => 0.65 * Math.min(1, t / 0.004) * Math.exp(-t * 13) *
+          Math.sin(TAU * (49 * t + 1.8 * (1 - Math.exp(-t * 37)))));
+      }
+      if (step % 4 === 2) {
+        let low = 0;
+        add(onset, 0.28, t => {
+          const noise = random() * 2 - 1;
+          low += 0.32 * (noise - low);
+          return Math.min(1, t / 0.002) *
+            (0.32 * (noise - low * 0.74) * Math.exp(-t * 22) +
+             0.21 * Math.sin(TAU * 177 * t) * Math.exp(-t * 35));
+        });
+      }
+      let previous = 0;
+      const accent = step % 2 === 0 ? 0.16 : 0.11;
+      add(onset, step % 8 === 7 ? 0.23 : 0.12, t => {
+        const noise = random() * 2 - 1;
+        previous += 0.65 * (noise - previous);
+        return accent * Math.min(1, t / 0.002) * Math.exp(-t * 35) * (noise - previous);
+      });
+    }
+    if (kind === "music") {
+      const hz = note => 440 * 2 ** ((note - 69) / 12);
+      const chords = [[57, 60, 64, 67], [53, 57, 60, 64], [55, 59, 62, 65], [52, 56, 59, 62]];
+      const roots = [33, 29, 31, 28];
+      for (let bar = 0; bar < chords.length; ++bar) {
+        for (const [index, note] of chords[bar].entries()) {
+          const frequency = hz(note);
+          add(bar * beat * 4 + index * 0.019, beat * 3.7, (t, i, count) => {
+            const phase = TAU * frequency * t;
+            const envelope = Math.min(1, t / 0.012, (count - i) / (0.08 * SAMPLE_RATE)) * Math.exp(-t * 2.2);
+            return 0.11 * envelope * (Math.sin(phase) + 0.32 * Math.sin(phase * 2) +
+              0.19 * Math.sin(phase * 3) + 0.12 * Math.sin(phase * 6));
+          });
+        }
+        for (const step of [0, 1.5, 2.5, 3]) {
+          const frequency = hz(roots[bar] + (step === 2.5 ? 12 : 0));
+          add((bar * 4 + step) * beat, step === 2.5 ? 0.21 : 0.44, (t, i, count) => {
+            const phase = TAU * frequency * t;
+            const envelope = Math.min(1, t / 0.013, (count - i) / (0.09 * SAMPLE_RATE)) * Math.exp(-t * 3.2);
+            return 0.34 * envelope * (Math.sin(phase) + 0.33 * Math.sin(phase * 2) + 0.17 * Math.sin(phase * 4));
+          });
+        }
+      }
+    }
+  }
+
+  let peak = 0;
+  const fade = 0.012 * SAMPLE_RATE;
+  for (let i = 0; i < data.length; i++) {
+    data[i] *= Math.min(1, i / fade, (data.length - 1 - i) / fade);
+    peak = Math.max(peak, Math.abs(data[i]));
+  }
+  const normalization = 0.46 / peak;
+  for (let i = 0; i < data.length; i++) data[i] *= normalization;
+  return data;
+}
+
+function getSamples(kind) {
+  if (!samples.has(kind)) samples.set(kind, makeSignal(kind));
+  return samples.get(kind);
+}
+
+function getBuffer(kind) {
+  if (!buffers.has(kind)) {
+    const channel = getSamples(kind);
+    const buffer = audioContext.createBuffer(1, channel.length, SAMPLE_RATE);
+    buffer.copyToChannel(channel, 0);
+    buffers.set(kind, buffer);
+  }
+  return buffers.get(kind);
+}
+
+function gainFromDb(db) {
+  return 10 ** (db / 20);
+}
+
+function outputGain() {
+  return 0.55 * (profile.volume / 100) ** 2;
+}
+
+function buildGraph() {
+  const input = audioContext.createBufferSource();
+  const pathA = audioContext.createGain();
+  const pathB = audioContext.createGain();
+  const center = audioContext.createStereoPanner();
+  const panner = audioContext.createStereoPanner();
+  const filter = audioContext.createBiquadFilter();
+  const levelB = audioContext.createGain();
+  const master = audioContext.createGain();
+  input.buffer = getBuffer(source);
+  input.loop = true;
+  filter.type = "peaking";
+  filter.frequency.value = mode === "eq" ? round.target : 1000;
+  filter.Q.value = round.q;
+  filter.gain.value = mode === "eq" ? round.eqGain : 0;
+  levelB.gain.value = mode === "gain" ? gainFromDb(round.target) : 1;
+  panner.pan.value = mode === "pan" ? round.target / 100 : 0;
+  pathA.gain.value = selectedSide === "a" ? 1 : 0;
+  pathB.gain.value = 1 - pathA.gain.value;
+  master.gain.value = 0;
+  input.connect(center).connect(pathA).connect(master);
+  input.connect(filter).connect(levelB).connect(panner).connect(pathB).connect(master);
+  master.connect(audioContext.destination);
+  input.onended = () => {
+    for (const node of [input, center, pathA, filter, levelB, panner, pathB, master]) node.disconnect();
+  };
+  return {input, pathA, pathB, master, started: audioContext.currentTime, offset};
+}
+
+function position() {
+  if (!audioGraph) return offset;
+  return (audioGraph.offset + Math.max(0, audioContext.currentTime - audioGraph.started)) % LOOP_SECONDS;
+}
+
+async function startPlayback() {
+  if (audioGraph || audioPending || summaryVisible) return;
+  const version = ++requestVersion;
+  audioPending = true;
+  get("audio-error").hidden = true;
+  try {
+    const Context = window.AudioContext || window.webkitAudioContext;
+    if (!Context) throw new Error("AudioContext no disponible");
+    audioContext ??= new Context();
+    if (audioContext.state !== "running") await audioContext.resume();
+    if (version !== requestVersion || summaryVisible) return;
+    const graph = buildGraph();
+    graph.input.start(graph.started, offset);
+    graph.master.gain.setTargetAtTime(outputGain(), graph.started, 0.006);
+    audioGraph = graph;
+    heard.add(selectedSide);
+    updateActions();
+    renderTransport();
+    animateWave();
+  } catch {
+    if (version === requestVersion) {
+      get("audio-error").textContent = "No se pudo iniciar el audio. Vuelve a pulsar reproducir o abre el archivo en otro navegador.";
+      get("audio-error").hidden = false;
+    }
+  } finally {
+    if (version === requestVersion) audioPending = false;
+  }
+}
+
+function stopPlayback(reset) {
+  requestVersion++;
+  audioPending = false;
+  offset = reset ? 0 : position();
+  if (audioGraph) {
+    const now = audioContext.currentTime;
+    audioGraph.master.gain.cancelScheduledValues(now);
+    audioGraph.master.gain.setTargetAtTime(0, now, 0.004);
+    audioGraph.input.stop(now + 0.028);
+    audioGraph = null;
+  }
+  cancelAnimationFrame(animationFrame);
+  renderTransport();
+  drawWave();
+}
+
+function selectSide(side) {
+  if (summaryVisible) return;
+  selectedSide = side;
+  renderTransport();
+  if (!audioGraph) {
+    void startPlayback();
+    return;
+  }
+  const now = audioContext.currentTime;
+  const crossfade = (param, value) => {
+    if (typeof param.cancelAndHoldAtTime === "function") param.cancelAndHoldAtTime(now);
+    else param.cancelScheduledValues(now);
+    param.setTargetAtTime(value, now, 0.008);
+  };
+  crossfade(audioGraph.pathA.gain, side === "a" ? 1 : 0);
+  crossfade(audioGraph.pathB.gain, side === "b" ? 1 : 0);
+  heard.add(side);
+  updateActions();
+}
+
+function togglePlayback() {
+  if (audioGraph || audioPending) stopPlayback(false);
+  else void startPlayback();
+}
+
+function formatTime(value) {
+  return "0:" + value.toFixed(1).padStart(4, "0");
+}
+
+function resizeWave() {
+  if (!wave || summaryVisible) return;
+  const width = canvas.clientWidth;
+  const height = canvas.clientHeight;
+  if (!width || !height) return;
+  const ratio = window.devicePixelRatio || 1;
+  canvas.width = Math.round(width * ratio);
+  canvas.height = Math.round(height * ratio);
+  wave.setTransform(ratio, 0, 0, ratio, 0, 0);
+  const data = getSamples(source);
+  const count = Math.max(1, Math.floor((width - 24) / 3.5));
+  waveformBars = Array.from({length: count}, (_, bar) => {
+    const start = Math.floor(bar * data.length / count);
+    const stop = Math.floor((bar + 1) * data.length / count);
+    let low = 0;
+    let high = 0;
+    for (let i = start; i < stop; i++) {
+      low = Math.min(low, data[i]);
+      high = Math.max(high, data[i]);
+    }
+    return [low, high];
+  });
+  drawWave();
+}
+
+function drawWave() {
+  if (!wave || summaryVisible) return;
+  const width = canvas.clientWidth;
+  const height = canvas.clientHeight;
+  if (!width || !height) return;
+  const inset = 12;
+  const usable = width - 2 * inset;
+  const mid = height / 2;
+  const time = position();
+  const cursor = inset + usable * time / LOOP_SECONDS;
+
+  wave.clearRect(0, 0, width, height);
+  wave.lineWidth = 1;
+  wave.strokeStyle = "#252d31";
+  wave.beginPath();
+  for (let tick = 0; tick <= LOOP_SECONDS; tick++) {
+    const x = inset + (usable * tick / LOOP_SECONDS);
+    wave.moveTo(x, 0);
+    wave.lineTo(x, height);
+  }
+  for (const y of [height / 4, mid, height * 3 / 4]) {
+    wave.moveTo(inset, y);
+    wave.lineTo(width - inset, y);
+  }
+  wave.stroke();
+
+  const gradient = wave.createLinearGradient(0, 0, 0, height);
+  gradient.addColorStop(0, "#b9e861");
+  gradient.addColorStop(0.5, "#7eb34e");
+  gradient.addColorStop(1, "#b9e861");
+  wave.strokeStyle = gradient;
+  wave.lineWidth = 1.35;
+  wave.beginPath();
+  waveformBars.forEach(([low, high], index) => {
+    const x = inset + usable * (index + 0.5) / waveformBars.length;
+    wave.moveTo(x, mid - Math.max(0.7, high * height * 0.97));
+    wave.lineTo(x, mid + Math.max(0.7, -low * height * 0.97));
+  });
+  wave.stroke();
+  if (audioGraph || time > 0) {
+    wave.fillStyle = "#d9ff9a";
+    wave.fillRect(cursor, 0, 1, height);
+  }
+  const label = formatTime(time) + " / " + formatTime(LOOP_SECONDS);
+  const transportTime = get("transport-time");
+  if (transportTime.textContent !== label) transportTime.textContent = label;
+}
+
+function animateWave() {
+  drawWave();
+  if (audioGraph) animationFrame = requestAnimationFrame(animateWave);
+}
+
+function updateVolume() {
+  get("volume-label").value = profile.volume + "%";
+  if (!audioGraph) return;
+  const gain = audioGraph.master.gain;
+  const now = audioContext.currentTime;
+  gain.cancelScheduledValues(now);
+  gain.setTargetAtTime(outputGain(), now, 0.012);
+}
+
+function setMode(next) {
+  if (mode === next) return;
+  mode = next;
+  profile.mode = next;
+  saveProfile();
+  displayMode();
+}
+
+for (const button of nav) button.addEventListener("click", () => setMode(button.dataset.mode));
+for (const button of sideButtons) button.addEventListener("click", () => selectSide(button.dataset.side));
+get("home").addEventListener("click", event => {
+  event.preventDefault();
+  setMode("eq");
+  window.scrollTo(0, 0);
+});
+get("difficulty").addEventListener("change", event => {
+  level = event.currentTarget.value;
+  profile.level = level;
+  saveProfile();
+  displayMode();
+});
+get("source").addEventListener("change", event => {
+  stopPlayback(true);
+  heard.clear();
+  source = event.currentTarget.value;
+  profile.source = source;
+  saveProfile();
+  updateActions();
+  resizeWave();
+});
+get("volume").addEventListener("input", event => {
+  profile.volume = Number(event.currentTarget.value);
+  updateVolume();
+  saveProfile();
+});
+get("play").addEventListener("click", togglePlayback);
+get("options").addEventListener("click", event => {
+  const button = event.target.closest("button");
+  if (!button || result) return;
+  choice = Number(button.dataset.value);
+  updateOptions();
+  updateActions();
+});
+get("confirm").addEventListener("click", () => {
+  if (!result) submit(false);
+  else if (session().results.length === ROUND_COUNT) showSummary(true);
+  else {
+    newRound();
+    get("play").focus();
+  }
+});
+get("skip").addEventListener("click", () => submit(true));
+get("restart").addEventListener("click", () => {
+  session().results = [];
+  saveProfile();
+  newRound();
+  get("play").focus();
+});
+document.addEventListener("keydown", event => {
+  if (event.repeat || event.ctrlKey || event.metaKey || event.altKey || summaryVisible) return;
+  const target = event.target;
+  if (target.matches("input,select,textarea,[contenteditable]")) return;
+  if (event.code === "Space" && !target.closest("button,a")) {
+    event.preventDefault();
+    togglePlayback();
+  } else if (event.key.toLowerCase() === "a" || event.key.toLowerCase() === "b") {
+    event.preventDefault();
+    selectSide(event.key.toLowerCase());
+  }
+});
+window.addEventListener("pagehide", () => stopPlayback(false));
+if (window.ResizeObserver) new ResizeObserver(resizeWave).observe(canvas);
+else window.addEventListener("resize", resizeWave);
+if (location.protocol === "file:") get("download").href = location.href;
+get("source").value = source;
+get("volume").value = profile.volume;
+get("timeline").replaceChildren(...[0, 2, 4, 6, 8].map(value => {
+  const tick = document.createElement("span");
+  tick.textContent = "0:0" + value;
+  return tick;
+}));
+updateVolume();
+saveProfile();
+displayMode();
+
+</script>
+</body>
+</html>
